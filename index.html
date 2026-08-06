@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RIPPLE STUDIO</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { neutral: { 850: '#1f1f1f', 950: '#0a0a0a' } }
+      }
+    }
+  }
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-neutral-950 text-neutral-200 overflow-hidden text-sm font-sans flex flex-col md:flex-row h-screen antialiased selection:bg-neutral-700">
+
+<nav class="md:hidden flex items-center justify-between px-4 py-3 border-b border-neutral-800 bg-[#171717]">
+  <span class="font-semibold text-sm">RIPPLE STUDIO</span>
+  <button id="menuToggle" class="p-1.5 hover:bg-neutral-800 rounded-md"><i data-lucide="menu" class="w-5 h-5"></i></button>
+</nav>
+
+<div id="sidebarOverlay" class="sidebar-overlay md:hidden"></div>
+
+<aside id="sidebar" class="w-80 flex-shrink-0 bg-[#171717] border-r border-neutral-800 flex flex-col h-full z-50 custom-scrollbar overflow-y-auto">
+
+  <div class="md:hidden flex items-center justify-between p-4 border-b border-neutral-800">
+    <h1 class="font-semibold">Impostazioni</h1>
+    <button id="menuClose" class="p-2 hover:bg-neutral-800 rounded-md"><i data-lucide="x" class="w-5 h-5"></i></button>
+  </div>
+
+  <div class="hidden md:block p-5 border-b border-neutral-800">
+    <h1 class="font-bold text-base">RIPPLE STUDIO</h1>
+    <p class="text-[10px] text-neutral-500 mt-1 uppercase tracking-wider">Contorni concentrici · SDF</p>
+  </div>
+
+  <div class="flex-1 pb-10">
+
+    <!-- ------------------------------------------------------------ Sorgente -->
+    <details class="group border-b border-neutral-800" open>
+      <summary class="flex justify-between items-center px-5 py-3.5 cursor-pointer select-none font-medium hover:bg-neutral-800/50 transition-colors">
+        <span>Sorgente</span>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-neutral-500 transition-transform group-open:-rotate-180"></i>
+      </summary>
+      <div class="px-5 pb-4 space-y-4">
+        <div class="seg" id="segSrcMode">
+          <button data-v="text" class="on">Testo</button>
+          <button data-v="file">SVG / PNG</button>
+        </div>
+
+        <div id="textCtl" class="space-y-3">
+          <textarea id="text" spellcheck="false" rows="3"
+            class="w-full bg-neutral-950 border border-neutral-700 rounded-md px-2.5 py-2 text-xs leading-relaxed resize-y custom-scrollbar">CHI MI
+PRESENTI
+???</textarea>
+          <select id="font" class="w-full bg-neutral-950 border border-neutral-700 rounded-md px-2.5 py-2 text-xs"></select>
+          <input id="fontCustom" type="text" placeholder="Nome del font installato sul sistema"
+            class="w-full bg-neutral-950 border border-neutral-700 rounded-md px-2.5 py-2 text-xs hidden">
+          <input type="file" id="fontFile" accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2" hidden>
+        </div>
+
+        <div id="fileCtl" class="hidden space-y-3">
+          <button id="pick" class="w-full flex items-center justify-center gap-2 border border-neutral-700 py-2 rounded-md hover:bg-neutral-800 transition-colors text-xs">
+            <i data-lucide="upload" class="w-4 h-4"></i> Carica SVG o PNG
+          </button>
+          <input type="file" id="file" accept="image/svg+xml,image/png,image/jpeg,image/webp" hidden>
+          <p class="text-[10px] text-neutral-500 leading-relaxed" id="fileName">Nessun file caricato.</p>
+
+          <div class="space-y-1.5">
+            <span class="text-[10px] text-neutral-500">Sagoma ricavata da</span>
+            <div class="seg" id="segSrcAlpha">
+              <button data-v="alpha" class="on">Alpha</button>
+              <button data-v="dark">Zone scure</button>
+              <button data-v="light">Zone chiare</button>
+            </div>
+          </div>
+
+          <label class="flex items-center gap-2 text-[10px] text-neutral-500 cursor-pointer hover:text-neutral-200 transition-colors">
+            <input type="checkbox" id="overlay" checked class="w-3.5 h-3.5 accent-neutral-200">
+            <span>Disegna l'artwork sopra</span>
+          </label>
+
+          <div class="space-y-1.5">
+            <span class="text-[10px] text-neutral-500">Colore dell'artwork</span>
+            <div class="seg" id="segArtMode">
+              <button data-v="orig" class="on">Originale</button>
+              <button data-v="A">A</button>
+              <button data-v="B">B</button>
+              <button data-v="custom">Perso.</button>
+            </div>
+          </div>
+
+          <div id="artRow" class="row-color hidden">
+            <input type="color" id="artCol" value="#111111">
+            <label class="text-[10px] text-neutral-500" for="artCol">Tinta dell'artwork</label>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- --------------------------------------------------------------- Forma -->
+    <details class="group border-b border-neutral-800" open>
+      <summary class="flex justify-between items-center px-5 py-3.5 cursor-pointer select-none font-medium hover:bg-neutral-800/50 transition-colors">
+        <span>Forma</span>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-neutral-500 transition-transform group-open:-rotate-180"></i>
+      </summary>
+      <div class="px-5 pb-4 space-y-4" id="shapeBody"></div>
+    </details>
+
+    <!-- --------------------------------------------------------------- Fasce -->
+    <details class="group border-b border-neutral-800" open>
+      <summary class="flex justify-between items-center px-5 py-3.5 cursor-pointer select-none font-medium hover:bg-neutral-800/50 transition-colors">
+        <span>Fasce</span>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-neutral-500 transition-transform group-open:-rotate-180"></i>
+      </summary>
+      <div class="px-5 pb-4 space-y-4">
+        <div id="bandsSliders" class="space-y-4"></div>
+
+        <div class="space-y-1.5">
+          <span class="text-[10px] text-neutral-500">Colore del distacco</span>
+          <div class="seg" id="segHaloMode">
+            <button data-v="A" class="on">A</button>
+            <button data-v="B">B</button>
+            <button data-v="custom">Perso.</button>
+            <button data-v="none">Trasp.</button>
+          </div>
+        </div>
+
+        <div id="haloRow" class="row-color hidden">
+          <input type="color" id="haloCol" value="#ffffff">
+          <label class="text-[10px] text-neutral-500" for="haloCol">Tinta del distacco</label>
+        </div>
+
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-[10px] text-neutral-500 cursor-pointer hover:text-neutral-200 transition-colors">
+            <input type="checkbox" id="solid" checked class="w-3.5 h-3.5 accent-neutral-200">
+            <span>Sagoma piena</span>
+          </label>
+          <label class="flex items-center gap-2 text-[10px] text-neutral-500 cursor-pointer hover:text-neutral-200 transition-colors">
+            <input type="checkbox" id="invert" class="w-3.5 h-3.5 accent-neutral-200">
+            <span>Inverti dentro / fuori</span>
+          </label>
+        </div>
+      </div>
+    </details>
+
+    <!-- -------------------------------------------------------------- Wobble -->
+    <details class="group border-b border-neutral-800" open>
+      <summary class="flex justify-between items-center px-5 py-3.5 cursor-pointer select-none font-medium hover:bg-neutral-800/50 transition-colors">
+        <span>Wobble</span>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-neutral-500 transition-transform group-open:-rotate-180"></i>
+      </summary>
+      <div class="px-5 pb-4 space-y-4">
+        <div class="seg" id="segMode">
+          <button data-v="1" class="on">Additivo</button>
+          <button data-v="2">Warp</button>
+          <button data-v="3">Entrambi</button>
+        </div>
+        <div id="wobBody" class="space-y-4"></div>
+      </div>
+    </details>
+
+    <!-- -------------------------------------------------------------- Colori -->
+    <details class="group border-b border-neutral-800" open>
+      <summary class="flex justify-between items-center px-5 py-3.5 cursor-pointer select-none font-medium hover:bg-neutral-800/50 transition-colors">
+        <span>Colori</span>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-neutral-500 transition-transform group-open:-rotate-180"></i>
+      </summary>
+      <div class="px-5 pb-4 space-y-4">
+        <div class="grid grid-cols-2 gap-2">
+          <div class="flex items-center gap-2">
+            <input type="color" id="colA" value="#efc46b">
+            <label class="text-[10px] text-neutral-500" for="colA">Fascia A</label>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="color" id="colB" value="#7089e0">
+            <label class="text-[10px] text-neutral-500" for="colB">Fascia B</label>
+          </div>
+        </div>
+        <button id="swap" class="w-full flex items-center justify-center gap-2 border border-neutral-700 py-2 rounded-md hover:bg-neutral-800 transition-colors text-xs">
+          <i data-lucide="arrow-left-right" class="w-4 h-4"></i> Scambia colori
+        </button>
+      </div>
+    </details>
+
+    <!-- ------------------------------------------------------------- Formato -->
+    <details class="group border-b border-neutral-800" open>
+      <summary class="flex justify-between items-center px-5 py-3.5 cursor-pointer select-none font-medium hover:bg-neutral-800/50 transition-colors">
+        <span>Formato</span>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-neutral-500 transition-transform group-open:-rotate-180"></i>
+      </summary>
+      <div class="px-5 pb-4 space-y-4">
+        <select id="preset" class="w-full bg-neutral-950 border border-neutral-700 rounded-md px-2.5 py-2 text-xs"></select>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="space-y-1">
+            <label class="text-[10px] text-neutral-500" for="W">Larghezza</label>
+            <input id="W" type="text" value="1080"
+              class="w-full bg-neutral-950 border border-neutral-700 rounded-md px-2 py-1.5 text-[10px] font-mono tabular-nums text-neutral-400">
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] text-neutral-500" for="H">Altezza</label>
+            <input id="H" type="text" value="1440"
+              class="w-full bg-neutral-950 border border-neutral-700 rounded-md px-2 py-1.5 text-[10px] font-mono tabular-nums text-neutral-400">
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- ----------------------------------------------------------- Animazione -->
+    <details class="group border-b border-neutral-800" open>
+      <summary class="flex justify-between items-center px-5 py-3.5 cursor-pointer select-none font-medium hover:bg-neutral-800/50 transition-colors">
+        <span>Animazione</span>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-neutral-500 transition-transform group-open:-rotate-180"></i>
+      </summary>
+      <div class="px-5 pb-4 space-y-4">
+        <p class="text-[10px] text-neutral-500 leading-relaxed">Il ciclo si richiude sempre esattamente: le fasce avanzano di un numero intero di anelli e il rumore percorre un anello chiuso.</p>
+        <div id="animBody" class="space-y-4"></div>
+        <div class="seg" id="segDir">
+          <button data-v="1" class="on">Verso l'esterno</button>
+          <button data-v="-1">Verso l'interno</button>
+        </div>
+      </div>
+    </details>
+
+    <!-- -------------------------------------------------------------- Esporta -->
+    <details class="group border-b border-neutral-800" open>
+      <summary class="flex justify-between items-center px-5 py-3.5 cursor-pointer select-none font-medium hover:bg-neutral-800/50 transition-colors">
+        <span>Esporta</span>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-neutral-500 transition-transform group-open:-rotate-180"></i>
+      </summary>
+      <div class="px-5 pb-4 space-y-4">
+        <div class="grid grid-cols-2 gap-2">
+          <button id="expPng" class="flex items-center justify-center gap-2 border border-neutral-700 py-2 rounded-md hover:bg-neutral-800 transition-colors text-xs">
+            <i data-lucide="image" class="w-4 h-4"></i> PNG
+          </button>
+          <button id="expSeed" class="flex items-center justify-center gap-2 border border-neutral-700 py-2 rounded-md hover:bg-neutral-800 transition-colors text-xs">
+            <i data-lucide="dices" class="w-4 h-4"></i> Nuovo seed
+          </button>
+        </div>
+
+        <button id="expSvg" class="w-full flex items-center justify-center gap-2 border border-neutral-700 py-2 rounded-md hover:bg-neutral-800 transition-colors text-xs">
+          <i data-lucide="pen-tool" class="w-4 h-4"></i> SVG vettoriale
+        </button>
+
+        <div id="vecBody" class="space-y-4"></div>
+
+        <label class="flex items-center gap-2 text-[10px] text-neutral-500 cursor-pointer hover:text-neutral-200 transition-colors">
+          <input type="checkbox" id="smoothCurves" checked class="w-3.5 h-3.5 accent-neutral-200">
+          <span>Curve morbide (bezier)</span>
+        </label>
+        <p class="text-[10px] text-neutral-500 leading-relaxed">Le fasce escono come un unico tracciato con riempimento <i>evenodd</i>: le controforme restano bucate e resta tutto editabile.</p>
+
+        <div class="seg" id="segVidFmt">
+          <button data-v="mp4" class="on">MP4</button>
+          <button data-v="webm">WebM</button>
+        </div>
+        <div id="fpsBody" class="space-y-4"></div>
+        <button id="expVid" class="w-full flex items-center justify-center gap-2 bg-neutral-200 text-black py-2 rounded-md font-medium hover:bg-white transition-colors text-xs">
+          <i data-lucide="video" class="w-4 h-4"></i> Registra video
+        </button>
+        <p class="text-[10px] text-neutral-500 leading-relaxed" id="expHint">Registra esattamente un ciclo, fotogramma per fotogramma.</p>
+      </div>
+    </details>
+
+    <!-- --------------------------------------------------- Preset e impostazioni -->
+    <details class="group border-b border-neutral-800">
+      <summary class="flex justify-between items-center px-5 py-3.5 cursor-pointer select-none font-medium hover:bg-neutral-800/50 transition-colors">
+        <span>Preset e impostazioni</span>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-neutral-500 transition-transform group-open:-rotate-180"></i>
+      </summary>
+      <div class="px-5 pb-4 space-y-4">
+        <div id="presetBtns" class="grid grid-cols-2 gap-2"></div>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="cfgSave" class="flex items-center justify-center gap-2 border border-neutral-700 py-2 rounded-md hover:bg-neutral-800 transition-colors text-xs">
+            <i data-lucide="save" class="w-4 h-4"></i> Salva
+          </button>
+          <button id="cfgLoad" class="flex items-center justify-center gap-2 border border-neutral-700 py-2 rounded-md hover:bg-neutral-800 transition-colors text-xs">
+            <i data-lucide="folder-open" class="w-4 h-4"></i> Carica
+          </button>
+        </div>
+        <input type="file" id="cfgFile" accept="application/json,.json" hidden>
+        <p class="text-[10px] text-neutral-500 leading-relaxed">Le impostazioni si esportano in JSON: utile per tenere le varianti di una campagna o per ripartire da un look già trovato.</p>
+      </div>
+    </details>
+
+  </div>
+</aside>
+
+<main class="flex-1 flex flex-col bg-neutral-950 overflow-hidden relative min-h-0">
+  <div id="viewport" class="flex-1 flex items-center justify-center overflow-hidden p-6 min-h-0">
+    <div id="canvasWrap" class="relative shadow-2xl max-w-full max-h-full" style="outline: 1px solid #262626;">
+      <canvas id="cv"></canvas>
+    </div>
+  </div>
+
+  <div class="h-11 flex-shrink-0 border-t border-neutral-800 bg-[#171717] flex items-center gap-3 px-4">
+    <button id="play" title="Play / pausa" class="w-8 h-7 flex items-center justify-center border border-neutral-700 rounded-md hover:bg-neutral-800 transition-colors"></button>
+    <input type="range" id="scrub" min="0" max="1000" value="0" class="w-32 md:w-48 flex-shrink-0">
+    <span id="tStat" class="text-[10px] font-mono tabular-nums text-neutral-400">0.00 s</span>
+    <span class="flex-1"></span>
+    <span id="busyTag" class="text-[10px] text-neutral-400 hidden">● LAVORO</span>
+    <span id="stat" class="text-[10px] text-neutral-500 truncate min-w-0"></span>
+  </div>
+</main>
+
+<div id="toast" class="fixed bottom-3.5 right-3.5 bg-neutral-800 border border-neutral-700 text-xs px-3 py-2 rounded-md z-50 pointer-events-none"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
